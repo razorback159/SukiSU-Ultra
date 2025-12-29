@@ -30,26 +30,6 @@ struct cred *ksu_cred;
 #include "sucompat.h"
 #include "setuid_hook.h"
 
-static int global_namespace_enable = 0;
-
-static int __init global_namespace_enable_setup(char *str)
-{
-    int val;
-
-    if (!str)
-        return 0;
-
-    if (kstrtoint(str, 0, &val)) {
-        pr_warn("androidboot.gne: invalid value\n");
-	global_namespace_enable = 0;
-        return 0;
-    }
-
-    global_namespace_enable = !!val;
-    return 0;
-}
-early_param("androidboot.gne", global_namespace_enable_setup);
-
 void sukisu_custom_config_init(void)
 {
 }
