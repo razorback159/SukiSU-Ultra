@@ -262,7 +262,7 @@ static void disable_seccomp_for_task(struct task_struct *tsk)
     tsk->seccomp.filter = NULL;
     atomic_set(&tsk->seccomp.filter_count, 0);
     spin_unlock_irq(&tsk->sighand->siglock);
-
+#ifdef KSU_HAS_SECCOMP_FILTER_RELEASE
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 0)
     // https://github.com/torvalds/linux/commit/bfafe5efa9754ebc991750da0bcca2a6694f3ed3#diff-45eb79a57536d8eccfc1436932f093eb5c0b60d9361c39edb46581ad313e8987R576-R577
     fake->flags |= PF_EXITING;
@@ -273,6 +273,7 @@ static void disable_seccomp_for_task(struct task_struct *tsk)
 
     seccomp_filter_release(fake);
     kfree(fake);
+#endif
 }
 
 void escape_to_root_for_cmd_su(uid_t target_uid, pid_t target_pid)
