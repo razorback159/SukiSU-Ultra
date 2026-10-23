@@ -118,7 +118,6 @@ import org.bakasu.bakasu.ui.theme.CardConfig
 import org.bakasu.bakasu.ui.theme.ThemeConfig
 import org.bakasu.bakasu.ui.theme.blurEffect
 import org.bakasu.bakasu.ui.theme.blurSource
-import org.bakasu.bakasu.ui.theme.renderBackgroundBlur
 import org.bakasu.bakasu.ui.util.adaptiveScaffoldWindowInsets
 import org.bakasu.bakasu.ui.viewmodel.HomeUiAction
 import org.bakasu.bakasu.ui.viewmodel.HomeUiState
@@ -486,13 +485,7 @@ fun PredictiveBackAnimationWidget(
     SettingsChooseWidget(
         icon = Icons.TwoTone.Animation,
         title = stringResource(R.string.predictive_back_animation),
-        items = listOf(
-            stringResource(R.string.predictive_back_animation_none),
-            stringResource(R.string.predictive_back_animation_aosp),
-            stringResource(R.string.predictive_back_animation_miuix),
-            stringResource(R.string.predictive_back_animation_scale),
-            stringResource(R.string.predictive_back_animation_ksu_classic),
-        ),
+        items = PredictiveBackAnimation.entries.map { stringResource(it.resId) },
         selectedIndex = uiState.predictiveBackAnimation.ordinal,
         onSelectedIndexChange = { index ->
             PredictiveBackAnimation.entries.getOrNull(index)?.let(onSelect)
@@ -508,11 +501,7 @@ fun PredictiveBackAnimationDirectionWidget(
     SettingsChooseWidget(
         icon = Icons.TwoTone.SwapHoriz,
         title = stringResource(R.string.predictive_back_exit_direction),
-        items = listOf(
-            stringResource(R.string.predictive_back_exit_direction_follow_gesture),
-            stringResource(R.string.predictive_back_exit_direction_always_right),
-            stringResource(R.string.predictive_back_exit_direction_always_left),
-        ),
+        items = PredictiveBackExitDirection.entries.map { stringResource(it.resId) },
         selectedIndex = uiState.predictiveBackExitDirection.ordinal,
         onSelectedIndexChange = { index ->
             PredictiveBackExitDirection.entries.getOrNull(index)?.let(onSelect)
@@ -633,8 +622,7 @@ private fun AppearanceSettings(
         ) { shape ->
             Surface(
                 modifier = Modifier
-                    .clip(shape)
-                    .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright),
+                    .clip(shape),
                 color = if (themeConfig.isEnableBlurExp) {
                     Color.Transparent
                 } else {
@@ -653,7 +641,7 @@ private fun AppearanceSettings(
             }
         }
 
-        item(visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        item(visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             SettingsSwitchWidget(
                 icon = Icons.TwoTone.BlurOn,
                 title = stringResource(id = R.string.settings_config_enable_blur),
@@ -668,7 +656,7 @@ private fun AppearanceSettings(
             )
         }
 
-        item(visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && isPortrait) {
+        item(visible = isPortrait) {
             SettingsSwitchWidget(
                 icon = Icons.TwoTone.Dock,
                 title = stringResource(R.string.enable_floating_bottom_bar),
@@ -984,7 +972,7 @@ private fun SegmentedColumnScope.backgroundAdjustmentControls(
     }
 
     item(
-        visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && state.useDynamicColor,
+        visible = state.useDynamicColor,
         topPadding = 1.dp,
     ) {
         SettingsSwitchWidget(
