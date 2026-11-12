@@ -9,6 +9,7 @@
 #include <linux/version.h>
 #include <linux/thread_info.h>
 #include <linux/utsname.h>
+#include <linux/sched/task.h>
 
 #ifdef CONFIG_KSU_SUSFS
 #include <linux/namei.h>
