@@ -715,7 +715,7 @@ static int sus_map_path_put_soon(const struct path *p)
 		return -ENOMEM;
 	w->path = *p;
 	init_task_work(&w->cb, sus_map_put_work_fn);
-	if (task_work_add(current, &w->cb, TWA_RESUME)) {
+	if (task_work_add(current, &w->cb, true)) {
 		kfree(w);
 		return -EIO;
 	}

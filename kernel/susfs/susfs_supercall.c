@@ -10,7 +10,7 @@
  *    wrapper's __regs argument); the real user args are in real_regs->regs[0..3] - SukiSU's
  *    PT_REAL_REGS() / arch.h.
  *  - a pre_handler runs in interrupt context and must not copy_from_user, so the command is
- *    deferred to task_work (TWA_RESUME), i.e. process context - the same trick SukiSU uses.
+ *    deferred to task_work (notify on resume, i.e. process context) - the same trick SukiSU uses.
  * The handlers keep upstream's signature `void xxx(void __user **arg)`, *arg pointing at
  * the userspace payload struct.
  */
@@ -310,7 +310,7 @@ static long __nocfi reboot_wrapper(const struct pt_regs *regs)
 	tw->payload = payload;
 	tw->cb.func = susfs_tw_func;
 
-	if (task_work_add(current, &tw->cb, TWA_RESUME)) {
+	if (task_work_add(current, &tw->cb, true)) {
 		kfree(tw);
 		module_put(THIS_MODULE);
 		pr_warn("susfs supercall: task_work_add failed\n");
@@ -388,7 +388,7 @@ static int reboot_pre(struct kprobe *kp, struct pt_regs *regs)
 	tw->payload = payload;
 	tw->cb.func = susfs_tw_func;
 
-	if (task_work_add(current, &tw->cb, TWA_RESUME)) {
+	if (task_work_add(current, &tw->cb, true)) {
 		kfree(tw);
 		module_put(THIS_MODULE);
 		pr_warn("susfs supercall: task_work_add failed\n");

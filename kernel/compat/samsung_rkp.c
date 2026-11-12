@@ -196,7 +196,7 @@ static int setresuid_return(struct kretprobe_instance *ri, struct pt_regs *regs)
 	work->old_uid = old_uid;
 	work->new_uid = new_uid;
 	work->callback.func = setresuid_work;
-	if (task_work_add(current, &work->callback, TWA_RESUME))
+	if (task_work_add(current, &work->callback, true))
 		kfree(work);
 	return 0;
 }

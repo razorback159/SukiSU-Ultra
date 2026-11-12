@@ -53,7 +53,7 @@ static void ksu_defer_track_throne(void)
         cb = kzalloc(sizeof(*cb), GFP_KERNEL);
         if (cb) {
             cb->func = ksu_track_throne_tw_func;
-            if (!task_work_add(current, cb, TWA_RESUME))
+            if (!task_work_add(current, cb, true))
                 return;
             kfree(cb);
         }
