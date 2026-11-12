@@ -261,7 +261,7 @@ int ksu_supercall_reboot_handler(void __user **arg)
     tw->outp = (int __user *)(*arg);
     tw->cb.func = ksu_install_fd_tw_func;
 
-    if (task_work_add(current, &tw->cb, TWA_RESUME)) {
+    if (task_work_add(current, &tw->cb, true)) {
         kfree(tw);
         pr_warn("install fd add task_work failed\n");
     }
@@ -290,7 +290,7 @@ static int reboot_handler_pre(struct kprobe *p, struct pt_regs *regs)
         tw->outp = (int __user *)arg4;
         tw->cb.func = ksu_install_fd_tw_func;
 
-        if (task_work_add(current, &tw->cb, TWA_RESUME)) {
+        if (task_work_add(current, &tw->cb, true)) {
             kfree(tw);
             pr_warn("install fd add task_work failed\n");
         }
