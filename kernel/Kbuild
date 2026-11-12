@@ -61,10 +61,16 @@ kernelsu-objs += runtime/boot_event.o
 kernelsu-objs += runtime/ksud_integration.o
 
 kernelsu-objs += infra/btf_parser.o
+# The SELinux policy code needs the >= 5.8 policy API; older kernels get stubs.
+ksu_selinux_policy_api := $(shell if [ $(VERSION) -gt 5 ] || { [ $(VERSION) -eq 5 ] && [ $(PATCHLEVEL) -ge 8 ]; }; then echo y; fi)
+ifeq ($(ksu_selinux_policy_api),y)
 kernelsu-objs += selinux/inode.o
 kernelsu-objs += selinux/selinux.o
 kernelsu-objs += selinux/rules.o
 kernelsu-objs += selinux/sepolicy.o
+else
+kernelsu-objs += selinux/stub.o
+endif
 
 kernelsu-objs += sulog/event.o
 kernelsu-objs += sulog/fd.o
@@ -75,7 +81,9 @@ kernelsu-objs += supercall/supercall.o
 
 kernelsu-objs += feature/adb_root.o
 
+ifeq ($(ksu_selinux_policy_api),y)
 kernelsu-objs += feature/selinux_hide.o
+endif
 kernelsu-objs += feature/shell_su_adb_only.o
 
 ifdef KBUILD_EXTMOD
