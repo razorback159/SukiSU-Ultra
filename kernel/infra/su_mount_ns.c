@@ -12,6 +12,7 @@
 #include <linux/slab.h>
 #include <linux/syscalls.h>
 #include <linux/task_work.h>
+#include <linux/uaccess.h>
 #include <linux/version.h>
 #include <uapi/linux/mount.h>
 
@@ -21,9 +22,32 @@
 #include "infra/su_mount_ns.h"
 #include "util.h"
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 8, 0)
+// Pre-5.8 kernels have no path_mount(); do_mount() takes a __user path, so widen the address limit for the kernel string.
+static int ksu_make_root_private(void)
+{
+    mm_segment_t old_fs = get_fs();
+    long ret;
+
+    set_fs(KERNEL_DS);
+    ret = do_mount(NULL, "/", NULL, MS_PRIVATE | MS_REC, NULL);
+    set_fs(old_fs);
+    return (int)ret;
+}
+#else
 extern int path_mount(const char *dev_name, struct path *path,
                       const char *type_page, unsigned long flags,
                       void *data_page);
+
+static int ksu_make_root_private(void)
+{
+    struct path root_path;
+    get_fs_root(current->fs, &root_path);
+    int ret = path_mount(NULL, &root_path, NULL, MS_PRIVATE | MS_REC, NULL);
+    path_put(&root_path);
+    return ret;
+}
+#endif
 
 // global mode , need CAP_SYS_ADMIN and CAP_SYS_CHROOT to perform setns
 static void ksu_mnt_ns_global(void)
@@ -126,10 +150,7 @@ static void ksu_mnt_ns_individual(void)
     }
 
     // make root mount private
-    struct path root_path;
-    get_fs_root(current->fs, &root_path);
-    int pm_ret = path_mount(NULL, &root_path, NULL, MS_PRIVATE | MS_REC, NULL);
-    path_put(&root_path);
+    int pm_ret = ksu_make_root_private();
 
     if (pm_ret < 0) {
         pr_err("failed to make root private, err: %d\n", pm_ret);

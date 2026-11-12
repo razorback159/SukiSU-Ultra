@@ -10,6 +10,7 @@
 #include <linux/thread_info.h>
 #include <linux/utsname.h>
 #include <linux/sched/task.h>
+#include <linux/sched/signal.h>
 
 #ifdef CONFIG_KSU_SUSFS
 #include <linux/namei.h>

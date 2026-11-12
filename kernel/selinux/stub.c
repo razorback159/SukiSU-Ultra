@@ -88,6 +88,16 @@ int __init ksu_selinux_inode_init(void)
 /* 0 makes do_get_wrapper_fd() fail with -EINVAL, so the wrapper-fd feature is unavailable. */
 u32 ksu_file_sid __read_mostly = 0;
 
+/* Referenced by the SUSFS SELinux hooks; with no policy API they never match a real SID. */
+u32 susfs_ksu_sid __read_mostly = 0;
+u32 susfs_priv_app_sid __read_mostly = 0;
+
+/* feature/selinux_hide.c is not built on this path (see kernel/Kbuild). */
+int my_setprocattr(const char *name, void *value, size_t size)
+{
+    return -EOPNOTSUPP;
+}
+
 u32 susfs_zygote_sid __read_mostly = 0;
 u32 susfs_zygote_next_sid __read_mostly = 0;
 
