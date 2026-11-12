@@ -70,13 +70,13 @@ static void ksu_defer_track_throne(void)
 
 static int ksu_handle_inode_event(struct fsnotify_mark *mark, u32 mask,
                                   struct inode *inode, struct inode *dir,
-                                  const struct qstr *file_name, u32 cookie)
+                                  const unsigned char *file_name, u32 cookie)
 {
     if (!file_name)
         return 0;
     if (mask & FS_ISDIR)
         return 0;
-    if (file_name->len == 13 && !memcmp(file_name->name, "packages.list", 13)) {
+    if (!strcmp(file_name, "packages.list")) {
         pr_info("packages.list detected: %d\n", mask);
 #ifdef CONFIG_KSU_THRONE_TRACKER_ALWAYS_THREADED
         track_throne(false);
